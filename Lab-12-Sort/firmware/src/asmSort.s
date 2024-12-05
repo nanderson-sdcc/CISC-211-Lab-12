@@ -66,17 +66,125 @@ NOTE: definitions: "greater than" means most positive number
 asmSwap:
 
     /* YOUR asmSwap CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
+    PUSH {r4-r11, LR}
+
     /* First, lets load the values into the registers. To do this, we only
     want to load the necessary data. So we need to check the size, as well as the
     sign. */
 
-    /* This checks the sign and size. If they are both 1, then we load a signed byte. */
+    /* Easy case is for a size of 4 bytes, since the signed or unsigned versions are identical. */
+    CMP r2, 4
+    BEQ four_bytes_case
+
+    /* At this point, we know it isn't 4 bytes, so the choice is between signed or unsigned 1 or 2 bytes.
+    One of the easy cases to check is if both r1 and r2 are 1, meaning a signed 1 byte value. */
     CMP r1, r2
-    LDRSBEQ r4, [r0]
-    LDRBNE n4, [r0]
+    BEQ signed_one_byte_case
+
+    /* Now we can check the remaining case for signed 2 bytes */
+    CBZNZ r1, signed_two_byte_case
+
+    /* Remaining cases are unsigned 1 byte or 2 byte. We simply check size then. */
+    CMP r2, 1
+    BEQ unsigned_one_byte_case
+
+    /* Final case is 2 byte unsigned */
+    LDRH r4, [r0], 4
+    LDRH r5, [r0]
     
 
+four_bytes_case:
+    /* We know the value is 4 bytes, so we can use a regular load regardless of sign */
+    LDR r4, [r0], 4
+    LDR r5, [r0]
 
+    /* Since we didn't determine if this case is signed or unsigned, we need to check the sign and then branch accordingly. */
+    TST r4, 0x80000000
+    BNE four_bytes_signed_comparison
+
+    /* At this point, we know its unsigned, so we do our comparison and return the function. */
+    CMP r4, r5
+    MOVHI r0, 1
+    MOVLS r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    POP {r4-r11, LR}
+    MOV PC, LR  
+
+signed_one_byte_case:
+    /* Load the values */
+    LDRSB r4, [r0], 4
+    LDRSB r5, [r0]
+
+    /* Do the proper comparison for this case. */
+    CMP r4, r5
+    MOVGT r0, 1
+    MOVLE r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    POP {r4-r11, LR}
+    MOV PC, LR
+
+signed_two_byte_case:
+    LDRSH r4, [r0], 4
+    LDRSH r5, [r0]
+
+    /* Do the proper comparison for this case. */
+    CMP r4, r5
+    MOVGT r0, 1
+    MOVLE r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    POP {r4-r11, LR}
+    MOV PC, LR
+
+unsigned_one_byte_case:
+    LDRB r4, [r0], 4
+    LDRB r5, [r0]
+
+    /* At this point, we know its unsigned, so we do our comparison and return the function. */
+    CMP r4, r5
+    MOVHI r0, 1
+    MOVLS r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    POP {r4-r11, LR}
+    MOV PC, LR  
+
+four_bytes_signed_comparison:
+    /* We know its signed, so we compare and return the function accordingly. */
+    CMP r4, r5
+    MOVGT r0, 1
+    MOVLE r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    POP {r4-r11, LR}
+    MOV PC, LR
 
     /* YOUR asmSwap CODE ABOVE THIS LINE! ^^^^^^^^^^^^^^^^^^^^^  */
     
