@@ -282,8 +282,55 @@ asmSort:
      */
 
     /* YOUR asmSort CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
+    PUSH {r4-r11, LR}
 
+    /* We need to call the asmSwap function repeatedly, incrementing the starting address.
+    We also need to keep track of the number of swaps made per cycle, since no swaps made means
+    that we are done. The registers will contain this:
 
+    r0: contains the address of our current element (this value gets incremented)
+    r1: determines sign value (1=signed, 0=unsigned)
+    r2: size of data values (1=byte, 2=halfword, 4=word)
+    r9: determines if cycle is over (0=cycle stil going, 1=cycle is complete)
+    r10: number of swaps made this cycle
+    r11: beginning address of array (never incremented)
+
+    We increment through the array, calling our sort function. We increment
+    the number of swaps made per cycle. Once we hit the end of the array, we place
+    1 in r9. We check if 0 swaps were made. If so, we are done. If not, we repeat the cycle
+    and reset the swap counter.
+    */
+
+    /* Initialize the registers */
+    MOV r11, r0
+    MOV r9, 0
+    MOV r10, 0
+
+sort_loop:
+    /* Call the swap function. */
+    BLR asmSwap
+
+    /* It returns a value in r0, representing if a swap was made. We increment if a swap was made. */
+    CMP r0, 1
+    ADDEQ r10, r10, 1
+
+    /* We check if we reached the end of the list. If we didn't, we loop again, but at
+    the next address. */
+    CMP r0, -1
+    ADDNE r0, r11, 4
+    BNE sort_loop
+
+    /* If it didn't branch, then we know that we reached a 0 value. 
+    We must check how many swaps have been made in this cycle. */
+    CMP r10, 0
+    POPEQ {r4-r11, LR}
+    MOVEQ PC, LR
+
+    /* Swaps were made, so we reset our counters and addresses and run the loop again. */
+    MOV r0, r11
+    MOV r9, 0
+    MOV r10, 0
+    B sort_loop
 
     /* YOUR asmSort CODE ABOVE THIS LINE! ^^^^^^^^^^^^^^^^^^^^^  */
 
