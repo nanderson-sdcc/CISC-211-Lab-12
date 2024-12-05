@@ -66,6 +66,15 @@ NOTE: definitions: "greater than" means most positive number
 asmSwap:
 
     /* YOUR asmSwap CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
+    /* First, lets load the values into the registers. To do this, we only
+    want to load the necessary data. So we need to check the size, as well as the
+    sign. */
+
+    /* This checks the sign and size. If they are both 1, then we load a signed byte. */
+    CMP r1, r2
+    LDRSBEQ r4, [r0]
+    LDRBNE n4, [r0]
+    
 
 
 
