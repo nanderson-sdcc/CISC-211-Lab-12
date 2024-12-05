@@ -68,6 +68,8 @@ asmSwap:
     /* YOUR asmSwap CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
     PUSH {r4-r11, LR}
 
+    MOV r11, r0 /* This is used later to have a reference to the original memory value */
+
     /* First, lets load the values into the registers. To do this, we only
     want to load the necessary data. So we need to check the size, as well as the
     sign. */
@@ -91,7 +93,24 @@ asmSwap:
     /* Final case is 2 byte unsigned */
     LDRH r4, [r0], 4
     LDRH r5, [r0]
-    
+
+    /* At this point, we know its unsigned, so we do our comparison and return the function. */
+    CMP r4, r5
+    MOVHI r0, 1
+    MOVLS r0, 0
+
+    /* Check if either is zero and override our return value if so. */
+    CMP r4, 0
+    MOVEQ r0, -1
+    CMP r5, 0
+    MOVEQ r0, -1
+
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
+
+    POP {r4-r11, LR}
+    MOV PC, LR  
 
 four_bytes_case:
     /* We know the value is 4 bytes, so we can use a regular load regardless of sign */
@@ -113,6 +132,10 @@ four_bytes_case:
     CMP r5, 0
     MOVEQ r0, -1
 
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
+
     POP {r4-r11, LR}
     MOV PC, LR  
 
@@ -132,6 +155,10 @@ signed_one_byte_case:
     CMP r5, 0
     MOVEQ r0, -1
 
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
+
     POP {r4-r11, LR}
     MOV PC, LR
 
@@ -149,6 +176,10 @@ signed_two_byte_case:
     MOVEQ r0, -1
     CMP r5, 0
     MOVEQ r0, -1
+
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
 
     POP {r4-r11, LR}
     MOV PC, LR
@@ -168,6 +199,10 @@ unsigned_one_byte_case:
     CMP r5, 0
     MOVEQ r0, -1
 
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
+
     POP {r4-r11, LR}
     MOV PC, LR  
 
@@ -182,6 +217,30 @@ four_bytes_signed_comparison:
     MOVEQ r0, -1
     CMP r5, 0
     MOVEQ r0, -1
+
+    /* Finally, we determine if a swap in neccessary. */
+    CMP r0, 1
+    BEQ swap
+
+    POP {r4-r11, LR}
+    MOV PC, LR
+
+swap:
+    /* This directive swaps the values. We saved the address of v1 into r11 at the very beginning, so we will use that. */
+
+    /* We check the size of the data and use the proper storing instruction. r4 contains v1 and r5 contains v2, so a swap
+    puts the value from r5 into r11, increments the address by 4, then places the value of r4 into the new r11 pointer value.  */
+    CMP r2, 1
+    STRBEQ r5, [r11], 4
+    STRBEQ r4, [r11]
+
+    CMP r2, 2
+    STRHEQ r5, [r11], 4
+    STRHEQ r4, [r11]
+
+    CMP r2, 4
+    STREQ r5, [r11], 4
+    STREQ r4, [r11]
 
     POP {r4-r11, LR}
     MOV PC, LR
