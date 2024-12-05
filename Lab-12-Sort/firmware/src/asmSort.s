@@ -84,7 +84,8 @@ asmSwap:
     BEQ signed_one_byte_case
 
     /* Now we can check the remaining case for signed 2 bytes */
-    CBZNZ r1, signed_two_byte_case
+    CMP r1, 0
+    BNE signed_two_byte_case
 
     /* Remaining cases are unsigned 1 byte or 2 byte. We simply check size then. */
     CMP r2, 1
@@ -308,7 +309,7 @@ asmSort:
 
 sort_loop:
     /* Call the swap function. */
-    BLR asmSwap
+    BL asmSwap
 
     /* It returns a value in r0, representing if a swap was made. We increment if a swap was made. */
     CMP r0, 1
