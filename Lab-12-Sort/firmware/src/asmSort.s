@@ -119,7 +119,7 @@ four_bytes_case:
     LDR r5, [r0]
 
     /* Since we didn't determine if this case is signed or unsigned, we need to check the sign and then branch accordingly. */
-    TST r4, 0x80000000
+    CMP r1, 0
     BNE four_bytes_signed_comparison
 
     /* At this point, we know its unsigned, so we do our comparison and return the function. */
