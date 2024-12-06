@@ -12,3 +12,17 @@ tests passed: 87
 tests failed: 3 
 total tests:  90 
 
+=========  Test Number: 8
+signed: 0; element size: 4
+Pre-swap input v1: 0x80000001
+Pre-swap input v2: 0x00000001
+FAIL: swap result expected:    1; actual: 0
+FAIL: v1 expected: 0x00000001; actual: 0x80000001
+FAIL: v2 expected: 0x80000001; actual: 0x00000001
+tests passed: 0; tests failed: 3 
+
+========= asmSwap Tests Summary
+tests passed: 87 
+tests failed: 3 
+total tests:  90 
+
